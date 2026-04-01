@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SNG Runner</title>
+    <title>SNG Runner Gold Edition</title>
     <style>
         body { margin: 0; overflow: hidden; }
-        canvas { background: url('background.png'); }
+        canvas { display: block; background: lightblue; }
     </style>
 </head>
 <body>
@@ -18,86 +18,56 @@
         canvas.height = window.innerHeight;
 
         let score = 0;
-        let highScore = localStorage.getItem('highScore') || 0;
-        const trophyImage = new Image();
-        trophyImage.src = 'trophy.png';
+        const maxScore = 5000;
         let gameState = 'MENU';
 
-        function init() {
-            addEventListeners();
-            requestAnimationFrame(gameLoop);
+        // Game elements
+        const player = { x: canvas.width / 2, y: canvas.height - 50, width: 30, height: 30 };
+        const obstacles = [];
+        const trophies = [];
+
+        function createObstacle() {
+            // Code to create obstacles
+            obstacles.push({ x: Math.random() * canvas.width, y: 0 });
+        }
+
+        function drawPlayer() {
+            ctx.fillStyle = 'lightblue';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        function drawObstacles() {
+            obstacles.forEach(obstacle => {
+                ctx.fillStyle = 'gray'; // Fences or trash cans
+                ctx.fillRect(obstacle.x, obstacle.y, 20, 20);
+            });
+        }
+
+        function updateScore() {
+            score = Math.min(score + 1, maxScore);
         }
 
         function gameLoop() {
-            clear();
-            switch(gameState) {
-                case 'MENU':
-                    showMenu();
-                    break;
-                case 'PLAYING':
-                    updateGame();
-                    break;
-                case 'WIN':
-                    showWin();
-                    break;
-                case 'GAMEOVER':
-                    showGameOver();
-                    break;
-            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            drawObstacles();
+            updateScore();
             requestAnimationFrame(gameLoop);
         }
 
-        function clear() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function startGame() {
+            gameState = 'PLAYING';
+            gameLoop();
         }
 
-        function showMenu() {
-            ctx.fillText('Press Start to Play', canvas.width / 2, canvas.height / 2);
-            ctx.fillText('High Score: ' + highScore, canvas.width / 2, canvas.height / 2 + 30);
-        }
+        // Touch Controls
+        canvas.addEventListener('touchstart', startGame);
 
-        function updateGame() {
-            // Game update logic, including drawing player, obstacles, etc.
-            // Update score logic
-            if (score >= 5000) {
-                gameState = 'WIN';
-            }
-        }
+        // Load High Score from localStorage
+        const highScore = localStorage.getItem('highScore') || 0;
 
-        function showWin() {
-            ctx.drawImage(trophyImage, canvas.width / 2 - 25, canvas.height / 2 - 25);
-            ctx.fillText('You Win!', canvas.width / 2, canvas.height / 2);
-            saveHighScore();
-        }
-
-        function showGameOver() {
-            ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
-            ctx.fillText('Score: ' + score, canvas.width / 2, canvas.height / 2 + 30);
-        }
-
-        function saveHighScore() {
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('highScore', highScore);
-            }
-        }
-
-        function addEventListeners() {
-            canvas.addEventListener('touchstart', startTouch);
-            canvas.addEventListener('touchend', endTouch);
-        }
-
-        function startTouch(e) {
-            if (gameState === 'MENU') {
-                gameState = 'PLAYING';
-            }
-        }
-
-        function endTouch(e) {
-            // Logic for what happens when touch ends
-        }
-
-        init();
+        // Initialization
+        createObstacle();
     </script>
 </body>
 </html>
